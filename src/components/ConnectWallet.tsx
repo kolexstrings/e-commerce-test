@@ -1,12 +1,43 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { connectWallet } from "../utils/ethersUtils";
 
 const ConnectWallet = () => {
   const [account, setAccount] = useState<string | null>(null);
   const [network, setNetwork] = useState<string>("");
   const [isConnecting, setIsConnecting] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(false);
+
+  // Theme management
+  useEffect(() => {
+    // Check for saved theme preference or default to system preference
+    const savedTheme = localStorage.getItem("theme");
+    const systemPrefersDark = window.matchMedia(
+      "(prefers-color-scheme: dark)"
+    ).matches;
+
+    if (savedTheme === "dark" || (!savedTheme && systemPrefersDark)) {
+      setIsDarkMode(true);
+      document.documentElement.classList.add("dark");
+    } else {
+      setIsDarkMode(false);
+      document.documentElement.classList.remove("dark");
+    }
+  }, []);
+
+  const toggleTheme = () => {
+    const newTheme = !isDarkMode;
+    setIsDarkMode(newTheme);
+
+    if (newTheme) {
+      document.documentElement.classList.add("dark");
+      localStorage.setItem("theme", "dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+      localStorage.setItem("theme", "light");
+    }
+  };
 
   const handleConnect = async () => {
     setIsConnecting(true);
@@ -35,20 +66,75 @@ const ConnectWallet = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 flex items-center justify-center p-4">
+    <div
+      className={`min-h-screen flex items-center justify-center p-4 relative ${
+        isDarkMode
+          ? "bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900"
+          : "bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100"
+      }`}
+    >
+      {/* Theme Toggle Button */}
+      <button
+        onClick={toggleTheme}
+        className={`absolute top-4 right-4 p-3 backdrop-blur-xl rounded-xl shadow-lg border transition-all duration-200 transform hover:scale-105 ${
+          isDarkMode
+            ? "bg-slate-800/80 border-slate-700/50 hover:shadow-xl"
+            : "bg-white/80 border-white/20 hover:shadow-xl"
+        }`}
+        aria-label="Toggle theme"
+      >
+        {isDarkMode ? (
+          <svg
+            className="w-5 h-5 text-yellow-500"
+            fill="currentColor"
+            viewBox="0 0 20 20"
+          >
+            <path
+              fillRule="evenodd"
+              d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z"
+              clipRule="evenodd"
+            />
+          </svg>
+        ) : (
+          <svg
+            className="w-5 h-5 text-slate-700"
+            fill="currentColor"
+            viewBox="0 0 20 20"
+          >
+            <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" />
+          </svg>
+        )}
+      </button>
+
       <div className="w-full max-w-md">
         {/* Page Heading */}
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-slate-900 to-slate-600 dark:from-white dark:to-slate-300 bg-clip-text text-transparent mb-2">
+          <h1
+            className={`text-3xl font-bold bg-clip-text text-transparent mb-2 ${
+              isDarkMode
+                ? "bg-gradient-to-r from-white to-slate-300"
+                : "bg-gradient-to-r from-slate-900 to-slate-600"
+            }`}
+          >
             Blockchain Ecommerce Test
           </h1>
-          <p className="text-slate-600 dark:text-slate-400 text-lg">
+          <p
+            className={`text-lg ${
+              isDarkMode ? "text-slate-400" : "text-slate-600"
+            }`}
+          >
             Connect your wallet to start shopping
           </p>
         </div>
 
         {/* Main Card */}
-        <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/20 dark:border-slate-700/50 p-8 animate-fade-in">
+        <div
+          className={`backdrop-blur-xl rounded-2xl shadow-2xl border p-8 animate-fade-in ${
+            isDarkMode
+              ? "bg-slate-800/80 border-slate-700/50"
+              : "bg-white/80 border-white/20"
+          }`}
+        >
           {/* Header */}
           <div className="text-center mb-8">
             <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
@@ -66,10 +152,14 @@ const ConnectWallet = () => {
                 />
               </svg>
             </div>
-            <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">
+            <h2
+              className={`text-2xl font-bold mb-2 ${
+                isDarkMode ? "text-white" : "text-slate-900"
+              }`}
+            >
               Web3 Wallet
             </h2>
-            <p className="text-slate-600 dark:text-slate-400">
+            <p className={isDarkMode ? "text-slate-400" : "text-slate-600"}>
               Connect your wallet to get started
             </p>
           </div>
@@ -109,11 +199,23 @@ const ConnectWallet = () => {
               </button>
 
               {/* Info Card */}
-              <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-4">
+              <div
+                className={`border rounded-xl p-4 ${
+                  isDarkMode
+                    ? "bg-blue-900/20 border-blue-800"
+                    : "bg-blue-50 border-blue-200"
+                }`}
+              >
                 <div className="flex items-start space-x-3">
-                  <div className="w-6 h-6 bg-blue-100 dark:bg-blue-800 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <div
+                    className={`w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 ${
+                      isDarkMode ? "bg-blue-800" : "bg-blue-100"
+                    }`}
+                  >
                     <svg
-                      className="w-3 h-3 text-blue-600 dark:text-blue-400"
+                      className={`w-3 h-3 ${
+                        isDarkMode ? "text-blue-400" : "text-blue-600"
+                      }`}
                       fill="currentColor"
                       viewBox="0 0 20 20"
                     >
@@ -125,10 +227,18 @@ const ConnectWallet = () => {
                     </svg>
                   </div>
                   <div>
-                    <h3 className="text-sm font-semibold text-blue-900 dark:text-blue-100 mb-1">
+                    <h3
+                      className={`text-sm font-semibold mb-1 ${
+                        isDarkMode ? "text-blue-100" : "text-blue-900"
+                      }`}
+                    >
                       Secure Connection
                     </h3>
-                    <p className="text-xs text-blue-700 dark:text-blue-300">
+                    <p
+                      className={`text-xs ${
+                        isDarkMode ? "text-blue-300" : "text-blue-700"
+                      }`}
+                    >
                       Your wallet connection is encrypted and secure. We never
                       store your private keys.
                     </p>
@@ -139,11 +249,23 @@ const ConnectWallet = () => {
           ) : (
             <div className="space-y-6 animate-slide-up">
               {/* Connected Status */}
-              <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-xl p-4">
+              <div
+                className={`border rounded-xl p-4 ${
+                  isDarkMode
+                    ? "bg-green-900/20 border-green-800"
+                    : "bg-green-50 border-green-200"
+                }`}
+              >
                 <div className="flex items-center space-x-3">
-                  <div className="w-8 h-8 bg-green-100 dark:bg-green-800 rounded-full flex items-center justify-center">
+                  <div
+                    className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                      isDarkMode ? "bg-green-800" : "bg-green-100"
+                    }`}
+                  >
                     <svg
-                      className="w-4 h-4 text-green-600 dark:text-green-400"
+                      className={`w-4 h-4 ${
+                        isDarkMode ? "text-green-400" : "text-green-600"
+                      }`}
                       fill="currentColor"
                       viewBox="0 0 20 20"
                     >
@@ -155,10 +277,18 @@ const ConnectWallet = () => {
                     </svg>
                   </div>
                   <div>
-                    <h3 className="text-sm font-semibold text-green-900 dark:text-green-100">
+                    <h3
+                      className={`text-sm font-semibold ${
+                        isDarkMode ? "text-green-100" : "text-green-900"
+                      }`}
+                    >
                       Wallet Connected
                     </h3>
-                    <p className="text-xs text-green-700 dark:text-green-300">
+                    <p
+                      className={`text-xs ${
+                        isDarkMode ? "text-green-300" : "text-green-700"
+                      }`}
+                    >
                       You're ready to interact with the blockchain
                     </p>
                   </div>
@@ -166,23 +296,43 @@ const ConnectWallet = () => {
               </div>
 
               {/* Account Info */}
-              <div className="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-4 space-y-3">
+              <div
+                className={`rounded-xl p-4 space-y-3 ${
+                  isDarkMode ? "bg-slate-700/50" : "bg-slate-50"
+                }`}
+              >
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-slate-600 dark:text-slate-400">
+                  <span
+                    className={`text-sm font-medium ${
+                      isDarkMode ? "text-slate-400" : "text-slate-600"
+                    }`}
+                  >
                     Address
                   </span>
                   <div className="flex items-center space-x-2">
                     <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse-slow"></div>
-                    <span className="text-sm font-mono text-slate-900 dark:text-white">
+                    <span
+                      className={`text-sm font-mono ${
+                        isDarkMode ? "text-white" : "text-slate-900"
+                      }`}
+                    >
                       {formatAddress(account)}
                     </span>
                   </div>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-slate-600 dark:text-slate-400">
+                  <span
+                    className={`text-sm font-medium ${
+                      isDarkMode ? "text-slate-400" : "text-slate-600"
+                    }`}
+                  >
                     Network
                   </span>
-                  <span className="text-sm text-slate-900 dark:text-white font-medium">
+                  <span
+                    className={`text-sm font-medium ${
+                      isDarkMode ? "text-white" : "text-slate-900"
+                    }`}
+                  >
                     {network}
                   </span>
                 </div>
@@ -216,7 +366,11 @@ const ConnectWallet = () => {
 
         {/* Footer */}
         <div className="text-center mt-6">
-          <p className="text-xs text-slate-500 dark:text-slate-400">
+          <p
+            className={`text-xs ${
+              isDarkMode ? "text-slate-400" : "text-slate-500"
+            }`}
+          >
             Created by Kolade
           </p>
         </div>
