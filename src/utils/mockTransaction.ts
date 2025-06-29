@@ -27,10 +27,12 @@ export const mockMintNFT = async (): Promise<{ hash: string }> => {
 
 // Simulate checking transaction status
 export const mockCheckTransaction = async (hash: string): Promise<boolean> => {
+  // Simulate network delay for transaction confirmation
   await new Promise((resolve) =>
     setTimeout(resolve, 1000 + Math.random() * 2000)
   );
 
-  // Simulate 95% success rate
+  // Simulate 95% success rate (hash parameter used for future implementation)
+  console.log(`Checking transaction: ${hash}`);
   return Math.random() < 0.95;
 };

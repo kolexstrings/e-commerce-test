@@ -3,7 +3,17 @@ import { ethers } from "ethers";
 // Extend Window interface to include ethereum
 declare global {
   interface Window {
-    ethereum?: any;
+    ethereum?: {
+      request: (args: {
+        method: string;
+        params?: unknown[];
+      }) => Promise<unknown>;
+      on: (event: string, callback: (...args: unknown[]) => void) => void;
+      removeListener: (
+        event: string,
+        callback: (...args: unknown[]) => void
+      ) => void;
+    };
   }
 }
 
@@ -28,7 +38,7 @@ export const connectWallet = async () => {
 
 export const getContract = (
   address: string,
-  abi: any,
+  abi: ethers.InterfaceAbi,
   signer: ethers.Signer
 ) => {
   return new ethers.Contract(address, abi, signer);

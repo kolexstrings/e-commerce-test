@@ -29,7 +29,8 @@ const ConnectWallet = () => {
 
   // Wallet state syncing and network change detection
   useEffect(() => {
-    const handleAccountsChanged = async (accounts: string[]) => {
+    const handleAccountsChanged = async (...args: unknown[]) => {
+      const accounts = args[0] as string[];
       if (accounts.length === 0) {
         // User disconnected their wallet
         setAccount(null);
@@ -71,11 +72,11 @@ const ConnectWallet = () => {
       // Check if wallet is already connected on page load
       const checkInitialConnection = async () => {
         try {
-          const accounts = await window.ethereum.request({
+          const accounts = await window.ethereum!.request({
             method: "eth_accounts",
           });
-          if (accounts.length > 0) {
-            setAccount(accounts[0]);
+          if (accounts && Array.isArray(accounts) && accounts.length > 0) {
+            setAccount(accounts[0] as string);
             await updateNetworkInfo();
           }
         } catch (error) {
@@ -87,12 +88,12 @@ const ConnectWallet = () => {
 
       // Cleanup event listeners
       return () => {
-        window.ethereum.removeListener(
+        window.ethereum!.removeListener(
           "accountsChanged",
           handleAccountsChanged
         );
-        window.ethereum.removeListener("chainChanged", handleChainChanged);
-        window.ethereum.removeListener("networkChanged", handleNetworkChanged);
+        window.ethereum!.removeListener("chainChanged", handleChainChanged);
+        window.ethereum!.removeListener("networkChanged", handleNetworkChanged);
       };
     }
   }, [account]);
@@ -324,7 +325,7 @@ const ConnectWallet = () => {
                         isDarkMode ? "text-green-300" : "text-green-700"
                       }`}
                     >
-                      You're ready to interact with the blockchain
+                      You&apos;re ready to interact with the blockchain
                     </p>
                   </div>
                 </div>
