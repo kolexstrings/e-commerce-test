@@ -1,8 +1,15 @@
 import { ethers } from "ethers";
 
+// Extend Window interface to include ethereum
+declare global {
+  interface Window {
+    ethereum?: any;
+  }
+}
+
 export const getProvider = () => {
   if (typeof window.ethereum !== "undefined") {
-    return new ethers.providers.Web3Provider(window.ethereum);
+    return new ethers.BrowserProvider(window.ethereum);
   } else {
     throw new Error("MetaMask not installed");
   }
@@ -11,7 +18,7 @@ export const getProvider = () => {
 export const connectWallet = async () => {
   const provider = getProvider();
   await provider.send("eth_requestAccounts", []);
-  const signer = provider.getSigner();
+  const signer = await provider.getSigner();
   const address = await signer.getAddress();
   const network = await provider.getNetwork();
   return { signer, address, network };
