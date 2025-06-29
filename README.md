@@ -1,36 +1,92 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Blockchain Ecommerce Test - Network & Wallet State Management
 
-## Getting Started
+A demonstration of how to detect network changes and sync UI with wallet state in Web3 applications.
 
-First, run the development server:
+## Network Change Detection
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+The application detects network changes through MetaMask's event listeners and updates the UI automatically:
+
+```typescript
+// In ConnectWallet.tsx
+useEffect(() => {
+  const handleChainChanged = async () => {
+    // Network/chain changed - refresh network info
+    await updateNetworkInfo();
+  };
+
+  const handleNetworkChanged = async () => {
+    // Network changed - refresh network info
+    await updateNetworkInfo();
+  };
+
+  // Set up event listeners
+  window.ethereum.on("chainChanged", handleChainChanged);
+  window.ethereum.on("networkChanged", handleNetworkChanged);
+}, []);
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## UI State Syncing
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+The UI automatically syncs with wallet state changes:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Wallet Connection State
 
-## Learn More
+- **Disconnected**: Shows connect button and security info
+- **Connecting**: Loading spinner with "Connecting..." text
+- **Connected**: Displays wallet address, network, and transaction options
 
-To learn more about Next.js, take a look at the following resources:
+### Account Change Detection
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+The app listens for account changes and updates automatically:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```typescript
+const handleAccountsChanged = async (accounts: string[]) => {
+  if (accounts.length === 0) {
+    // User disconnected their wallet
+    setAccount(null);
+    setNetwork("");
+  } else if (account !== accounts[0]) {
+    // Account changed
+    setAccount(accounts[0]);
+    await updateNetworkInfo();
+  }
+};
+```
 
-## Deploy on Vercel
+### Network Display
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+The current network is displayed and updates automatically when changed:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```typescript
+const updateNetworkInfo = async () => {
+  const provider = getProvider();
+  const network = await provider.getNetwork();
+  setNetwork(network.name || `Chain ID: ${network.chainId}`);
+};
+```
+
+### Transaction State Management
+
+The UI provides real-time feedback for transaction states:
+
+- **Pending**: Yellow loading state with spinner
+- **Success**: Green confirmation with transaction hash
+- **Error**: Red error state with retry option
+
+## Key Implementation Details
+
+1. **Event Listeners**: Uses `accountsChanged`, `chainChanged`, and `networkChanged` events
+2. **Automatic Detection**: Checks for existing wallet connection on page load
+3. **State Management**: React state hooks manage wallet and transaction states
+4. **UI Updates**: Conditional rendering based on connection and transaction states
+5. **Error Handling**: Graceful error states with user-friendly messages
+6. **Cleanup**: Properly removes event listeners to prevent memory leaks
+
+## Testing Network Changes
+
+1. Connect your wallet
+2. Switch networks in MetaMask (e.g., from Ethereum mainnet to a testnet)
+3. The UI will automatically reflect the new network
+4. Switch accounts in MetaMask - the UI updates automatically
+5. Disconnect wallet in MetaMask - the UI returns to disconnected state
+6. Transaction states will update based on the current network

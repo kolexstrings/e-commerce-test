@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { connectWallet } from "../utils/ethersUtils";
+import { connectWallet, getProvider } from "../utils/ethersUtils";
 import ThemeToggle from "./ThemeToggle";
 import TransactionDemo from "./TransactionDemo";
 
@@ -26,6 +26,76 @@ const ConnectWallet = () => {
       document.documentElement.classList.remove("dark");
     }
   }, []);
+
+  // Wallet state syncing and network change detection
+  useEffect(() => {
+    const handleAccountsChanged = async (accounts: string[]) => {
+      if (accounts.length === 0) {
+        // User disconnected their wallet
+        setAccount(null);
+        setNetwork("");
+      } else if (account !== accounts[0]) {
+        // Account changed
+        setAccount(accounts[0]);
+        await updateNetworkInfo();
+      }
+    };
+
+    const handleChainChanged = async () => {
+      // Network/chain changed - refresh network info
+      await updateNetworkInfo();
+    };
+
+    const handleNetworkChanged = async () => {
+      // Network changed - refresh network info
+      await updateNetworkInfo();
+    };
+
+    const updateNetworkInfo = async () => {
+      try {
+        const provider = getProvider();
+        const network = await provider.getNetwork();
+        setNetwork(network.name || `Chain ID: ${network.chainId}`);
+      } catch (error) {
+        console.error("Failed to update network info:", error);
+        setNetwork("Unknown Network");
+      }
+    };
+
+    // Set up event listeners for wallet state changes
+    if (typeof window.ethereum !== "undefined") {
+      window.ethereum.on("accountsChanged", handleAccountsChanged);
+      window.ethereum.on("chainChanged", handleChainChanged);
+      window.ethereum.on("networkChanged", handleNetworkChanged);
+
+      // Check if wallet is already connected on page load
+      const checkInitialConnection = async () => {
+        try {
+          const accounts = await window.ethereum.request({
+            method: "eth_accounts",
+          });
+          if (accounts.length > 0) {
+            setAccount(accounts[0]);
+            await updateNetworkInfo();
+          }
+        } catch (error) {
+          console.error("Failed to check initial connection:", error);
+        }
+      };
+
+      checkInitialConnection();
+
+      // Cleanup event listeners
+      return () => {
+        window.ethereum.removeListener(
+          "accountsChanged",
+          handleAccountsChanged
+        );
+        window.ethereum.removeListener("chainChanged", handleChainChanged);
+        window.ethereum.removeListener("networkChanged", handleNetworkChanged);
+      };
+    }
+  }, [account]);
 
   const toggleTheme = () => {
     const newTheme = !isDarkMode;
