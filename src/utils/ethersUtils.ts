@@ -29,7 +29,7 @@ export const getProvider = () => {
 
 export const connectWallet = async () => {
   const provider = getProvider();
-  await provider.send("eth_requestAccounts", []);
+  await provider.send("eth_requestAccounts", []); //wallet permission to connect
   const signer = await provider.getSigner();
   const address = await signer.getAddress();
   const network = await provider.getNetwork();

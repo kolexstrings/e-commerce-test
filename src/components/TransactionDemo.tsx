@@ -189,7 +189,7 @@ const TransactionDemo = ({ isDarkMode }: TransactionDemoProps) => {
             </div>
             <button
               onClick={resetTransaction}
-              className="text-xs px-2 py-1 rounded bg-green-200 dark:bg-green-800 text-green-800 dark:text-green-200 hover:bg-green-300 dark:hover:bg-green-700 transition-colors"
+              className="text-xs px-2 py-1 rounded bg-green-200 dark:bg-green-800 text-green-800 dark:text-green-200 hover:bg-green-300 dark:hover:bg-green-700 transition-colors cursor-pointer"
             >
               Reset
             </button>

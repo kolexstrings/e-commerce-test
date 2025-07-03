@@ -7,7 +7,7 @@ const ThemeToggle = ({ isDarkMode, onToggle }: ThemeToggleProps) => {
   return (
     <button
       onClick={onToggle}
-      className={`absolute top-4 right-4 p-3 backdrop-blur-xl rounded-xl shadow-lg border transition-all duration-200 transform hover:scale-105 ${
+      className={`absolute top-4 right-4 p-3 backdrop-blur-xl rounded-xl shadow-lg border transition-all duration-200 transform hover:scale-105 cursor-pointer ${
         isDarkMode
           ? "bg-slate-800/80 border-slate-700/50 hover:shadow-xl"
           : "bg-white/80 border-white/20 hover:shadow-xl"
