@@ -80,7 +80,7 @@ const TransactionDemo = ({ isDarkMode }: TransactionDemoProps) => {
         !transactionState.isError && (
           <button
             onClick={handleMintNFT}
-            className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-200 transform hover:scale-[1.02] shadow-lg hover:shadow-xl"
+            className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-200 transform hover:scale-[1.02] shadow-lg hover:shadow-xl cursor-pointer"
           >
             <div className="flex items-center justify-center space-x-2">
               <svg
